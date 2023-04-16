@@ -18,11 +18,11 @@ public class GolferService {
         this.repository = _repository;
     }
 
-    private Optional<Golfer> getGolferById(int id){
+    public Optional<Golfer> getGolferById(int id){
         return repository.findById(id);
     }
 
-    private Iterable<Golfer> getGolfers(){
+    public Iterable<Golfer> getGolfers(){
         return repository.findAll();
     }
 }

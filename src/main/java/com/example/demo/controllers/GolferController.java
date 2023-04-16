@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 public class GolferController {
@@ -15,13 +16,13 @@ public class GolferController {
 
     @GetMapping("/golfers")
     @ResponseBody
-    private List<Golfer> helloGolfer(){
-        return service.getGolfers()
+    private Iterable<Golfer> helloGolfer(){
+        return service.getGolfers();
 
     }
 
     @GetMapping("/golfers/{id}")
-    private Golfer helloGolfer(@PathVariable int id){
-        return null;
+    private Optional<Golfer> helloGolfer(@PathVariable int id){
+        return service.getGolferById(id);
     }
 }

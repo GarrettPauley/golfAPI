@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Entity
-@Table(name="Golfers")
+@Table(name="GOLFERS")
 public class Golfer {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
