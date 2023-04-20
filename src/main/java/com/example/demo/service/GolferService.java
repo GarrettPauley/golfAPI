@@ -1,8 +1,10 @@
 package com.example.demo.service;
 
 import com.example.demo.domain.Golfer;
+import com.example.demo.exceptions.UserNotFoundException;
 import com.example.demo.repositories.GolferRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,11 +20,12 @@ public class GolferService {
         this.repository = _repository;
     }
 
-    public Optional<Golfer> getGolferById(int id){
-        return repository.findById(id);
+    public Golfer getGolferById(int id) throws UserNotFoundException{
+        return repository.findById(id).orElseThrow( () -> new UserNotFoundException(id));
     }
 
-    public Iterable<Golfer> getGolfers(){
+    public List<Golfer> getGolfers(){
         return repository.findAll();
     }
+
 }

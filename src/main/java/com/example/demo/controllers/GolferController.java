@@ -1,6 +1,7 @@
 package com.example.demo.controllers;
 
 import com.example.demo.domain.Golfer;
+import com.example.demo.exceptions.UserNotFoundException;
 import com.example.demo.service.GolferService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,7 +23,7 @@ public class GolferController {
     }
 
     @GetMapping("/golfers/{id}")
-    private Optional<Golfer> helloGolfer(@PathVariable int id){
+    private Golfer helloGolfer(@PathVariable int id) throws UserNotFoundException {
         return service.getGolferById(id);
     }
 }
