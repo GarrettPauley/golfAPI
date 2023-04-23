@@ -5,6 +5,7 @@ import com.example.demo.domain.Golfer;
 import com.example.demo.exceptions.UserNotFoundException;
 import com.example.demo.service.GolferService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.coyote.Response;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,18 +14,23 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.BDDAssumptions.given;
 import static org.hamcrest.Matchers.hasSize;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.request;
+import static org.hamcrest.Matchers.is;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -95,6 +101,56 @@ class GolferControllerTests {
                 .andExpect(jsonPath("$", hasSize(3))
                 ).andDo(print());
     }
+
+    @Test
+    public void  GIVEN_golferObject_WHEN_PostGolfers_THEN_returnCreatedGolferWith201Status() throws Exception{
+        // GIVEN - a few users exists in a list.
+        Golfer g = Golfer.builder()
+                .name("Gary Player")
+                .age(75)
+                .nationality("South African")
+                .handicap(2)
+                .build();
+
+        // WHEN
+        ResultActions response = mockMvc.perform(post("/golfers")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectmapper.writeValueAsString(g)));
+
+        // THEN
+       response.andDo(print())
+           .andExpect(status().isCreated())
+           .andExpect(jsonPath("$.name", is(g.getName())))
+           .andExpect(jsonPath("$.age", is(g.getAge())))
+           .andExpect(jsonPath("$.nationality", is(g.getNationality())))
+           .andExpect(jsonPath("$.handicap", is(g.getHandicap())));
+
+    }
+
+
+    @Test
+    public void  GIVEN_golferObjectNullName_WHEN_PostGolfers_THEN_return400BadRequest() throws Exception{
+        // GIVEN - a few users exists in a list.
+        Golfer g = Golfer.builder()
+                .name(null)
+                .age(75)
+                .nationality("South African")
+                .handicap(2)
+                .build();
+
+        // WHEN
+        ResultActions response = mockMvc.perform(post("/golfers")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectmapper.writeValueAsString(g)));
+
+        // THEN
+        response.andDo(print())
+                .andExpect(status().isBadRequest());
+
+    }
+
+
+
 
 
 }
