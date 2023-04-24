@@ -4,6 +4,7 @@ import com.example.demo.domain.Golfer;
 import com.example.demo.exceptions.UserNotFoundException;
 import com.example.demo.service.GolferService;
 import jakarta.validation.Valid;
+import org.apache.tomcat.util.http.parser.HttpParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
@@ -40,4 +41,11 @@ public class GolferController {
         return new ResponseEntity(golfer, HttpStatus.CREATED);
 
     }
+
+    @DeleteMapping("/golfers/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    private void deleteGolfer(@PathVariable int id) {
+        service.deleteGolfer(id);
+    }
+
 }

@@ -30,6 +30,7 @@ import java.util.Optional;
 import static org.assertj.core.api.BDDAssumptions.given;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -137,7 +138,6 @@ class GolferControllerTests {
                 .nationality("South African")
                 .handicap(2)
                 .build();
-
         // WHEN
         ResultActions response = mockMvc.perform(post("/golfers")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -146,7 +146,20 @@ class GolferControllerTests {
         // THEN
         response.andDo(print())
                 .andExpect(status().isBadRequest());
+    }
 
+
+    @Test
+    public void  GIVEN_golferID_WHEN_DeleteGolfers_THEN_return204NoContent() throws Exception{
+        // GIVEN - a few users exists in a list.
+
+        // WHEN
+        ResultActions response = mockMvc.perform(delete("/golfers/10")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // THEN
+        response.andDo(print())
+                .andExpect(status().isNoContent());
     }
 
 
