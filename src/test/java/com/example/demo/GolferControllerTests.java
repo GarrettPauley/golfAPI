@@ -6,14 +6,19 @@ import com.example.demo.exceptions.UserNotFoundException;
 import com.example.demo.service.GolferService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.coyote.Response;
+import org.assertj.core.api.BDDAssumptions;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.crossstore.ChangeSetPersister;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,14 +28,17 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.net.http.HttpResponse;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.BDDAssumptions.given;
-import static org.hamcrest.Matchers.hasSize;
-import static org.hamcrest.Matchers.is;
+import static org.assertj.core.api.BDDAssumptions.givenCode;
+import static org.hamcrest.Matchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -66,7 +74,7 @@ class GolferControllerTests {
         Golfer happyGilmore = new Golfer(id, name, nationality, age,handicap);
         String uri = GOLFER_CONTROLLER_BASE + "/" + id;
         // WHEN and THEN
-        Mockito.when(golferService.getGolferById(5)).thenReturn(happyGilmore);
+        when(golferService.getGolferById(5)).thenReturn(Optional.of(happyGilmore));
         // ASSERT
         this.mockMvc.perform(
                 MockMvcRequestBuilders.get(uri))
@@ -82,7 +90,7 @@ class GolferControllerTests {
         int fakeId = 12345;
         String nonExistURI = GOLFER_CONTROLLER_BASE  + fakeId;
         // WHEN & THEN
-        Mockito.when(golferService.getGolferById(fakeId)).thenThrow(UserNotFoundException.class);
+        when(golferService.getGolferById(fakeId)).thenThrow(UserNotFoundException.class);
         mockMvc.perform(MockMvcRequestBuilders.get(nonExistURI))
                 .andExpect(status().isNotFound()).andDo(print());
     }
@@ -95,7 +103,7 @@ class GolferControllerTests {
         Golfer fake3 = new Golfer(13, "Gary Player", "South African", 62, 2);
         List<Golfer> fakeList = Arrays.asList(fake1, fake2, fake3);
         // WHEN & THEN
-        Mockito.when(golferService.getGolfers()).thenReturn(fakeList);
+        when(golferService.getGolfers()).thenReturn(fakeList);
         mockMvc.perform(get(GOLFER_CONTROLLER_BASE))
                 .andExpect(status().isOk())
                 .andExpect(content().contentType(MediaType.APPLICATION_JSON))
@@ -151,10 +159,9 @@ class GolferControllerTests {
 
     @Test
     public void  GIVEN_golferID_WHEN_DeleteGolfers_THEN_return204NoContent() throws Exception{
-        // GIVEN - a few users exists in a list.
 
         // WHEN
-        ResultActions response = mockMvc.perform(delete("/golfers/10")
+        ResultActions response = mockMvc.perform(delete("/golfers/1")
                 .contentType(MediaType.APPLICATION_JSON));
 
         // THEN
@@ -162,6 +169,48 @@ class GolferControllerTests {
                 .andExpect(status().isNoContent());
     }
 
+
+    @Test
+    public void  GIVEN_golferID_WHEN_UpdateGolfer_THEN_return200WithUpdatedGolfer() throws Exception{
+       Golfer g = Golfer.builder()
+           .age(24)
+           .name("Garrett Pauley")
+           .nationality("American")
+           .handicap(9).build();
+
+        Golfer updatedG = Golfer.builder()
+                .age(24)
+                .name("Garrett Pauley")
+                .nationality("American")
+                .handicap(10).build();
+        // WHEN
+        //BDDMockito.given(golferService.getGolferById(1)).willReturn(Optional.of(g));
+        //BDDMockito.given(golferService.updateGolfer(any(Golfer.class))).willAnswer(invocation -> invocation.getArgument(0));
+        //when(golferService.updateeGolfer(any(Golfer.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        
+        ResultActions response =
+                 mockMvc.perform(put("/golfers/{id}", 1)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectmapper.writeValueAsString(updatedG))
+        );
+
+
+        // THEN
+        response.andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.handicap", is(10)));
+
+    }
+
+    @Test
+    public void  GIVEN_golferIDNonExist_WHEN_DeleteGolfers_THEN_return404() throws Exception{
+        int someId = 1;
+        Mockito.doThrow(new UserNotFoundException(someId)).when(golferService).deleteGolfer(someId);
+        mockMvc.perform(delete("/golfers/{id}", someId)
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound())
+                .andDo(print());
+    }
 
 
 

@@ -30,7 +30,7 @@ public class GolferController {
     }
 
     @GetMapping("/golfers/{id}")
-    private Golfer getGolfer(@PathVariable int id) throws UserNotFoundException {
+    private Optional<Golfer> getGolfer(@PathVariable int id) throws UserNotFoundException {
         return service.getGolferById(id);
     }
 
@@ -39,12 +39,17 @@ public class GolferController {
     private ResponseEntity<Golfer> addGolfer(@Valid @RequestBody Golfer golfer) {
         service.saveGolfer(golfer);
         return new ResponseEntity(golfer, HttpStatus.CREATED);
-
     }
 
+    @PutMapping("/golfers/{id}")
+    private ResponseEntity<Golfer> updateGolfer(@Valid @RequestBody Golfer golfer){
+        service.saveGolfer(golfer);
+        return new ResponseEntity(golfer, HttpStatus.OK);
+    }
+
+
     @DeleteMapping("/golfers/{id}")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    private void deleteGolfer(@PathVariable int id) {
+    private void deleteGolfer(@PathVariable int id) throws UserNotFoundException{
         service.deleteGolfer(id);
     }
 
