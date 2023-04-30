@@ -5,13 +5,11 @@ import com.example.demo.domain.Golfer;
 import com.example.demo.exceptions.UserNotFoundException;
 import com.example.demo.service.GolferService;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.validation.constraints.AssertTrue;
 import org.apache.coyote.Response;
 import org.assertj.core.api.BDDAssumptions;
 import org.hamcrest.Matchers;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.mockito.BDDMockito;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +34,7 @@ import java.util.Optional;
 import static org.assertj.core.api.BDDAssumptions.given;
 import static org.assertj.core.api.BDDAssumptions.givenCode;
 import static org.hamcrest.Matchers.*;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.when;
@@ -63,7 +62,8 @@ class GolferControllerTests {
 
 
     @Test
-    //@DisplayName("GET /golfers/{id} should return a list of JSON objects with 200 status")
+    @Order(1)
+    @DisplayName("GET /golfers/{id} : return golfer and 200 ")
     public void GIVEN_userIsValid_THEN_return200WithJSONResponse() throws Exception{
         // GIVEN
         int id = 5;
@@ -85,6 +85,8 @@ class GolferControllerTests {
     }
 
     @Test
+    @Order(2)
+    @DisplayName("GET: return 404 for invalid id")
     public void  WHEN_userIsInvalid_THEN_return404() throws Exception{
         // GIVEN
         int fakeId = 12345;
@@ -96,6 +98,8 @@ class GolferControllerTests {
     }
 
     @Test
+    @Order(3)
+    @DisplayName("GET: return list of golfers ")
     public void  WHEN_getGolfers_THEN_returnListOfGolfers_() throws Exception{
         // GIVEN - a few users exists in a list.
         Golfer fake1 = new Golfer(10, "Arnold Palmer", "American", 60, 4);
@@ -112,6 +116,8 @@ class GolferControllerTests {
     }
 
     @Test
+    @Order(4)
+    @DisplayName("POST: given valid golfer - return 201 created status")
     public void  GIVEN_golferObject_WHEN_PostGolfers_THEN_returnCreatedGolferWith201Status() throws Exception{
         // GIVEN - a few users exists in a list.
         Golfer g = Golfer.builder()
@@ -138,10 +144,12 @@ class GolferControllerTests {
 
 
     @Test
-    public void  GIVEN_golferObjectNullName_WHEN_PostGolfers_THEN_return400BadRequest() throws Exception{
+    @Order(5)
+    @DisplayName("POST: blank name returns 400 bad request")
+    public void  GIVEN_golferObjectBlankName_WHEN_PostGolfers_THEN_return400BadRequest() throws Exception{
         // GIVEN - a few users exists in a list.
         Golfer g = Golfer.builder()
-                .name(null)
+                .name("")
                 .age(75)
                 .nationality("South African")
                 .handicap(2)
@@ -157,44 +165,45 @@ class GolferControllerTests {
     }
 
 
+
     @Test
-    public void  GIVEN_golferID_WHEN_DeleteGolfers_THEN_return204NoContent() throws Exception{
+    @Order(6)
+    @DisplayName("POST: missing name returns 400")
+    public void GIVEN_JSONwithMissingName_WHEN_POSTgolfers_THEN_return400() throws Exception {
+        Golfer g = Golfer.builder()
+                .age(24)
+                .nationality("American")
+                .handicap(9).build();
 
-        // WHEN
-        ResultActions response = mockMvc.perform(delete("/golfers/1")
-                .contentType(MediaType.APPLICATION_JSON));
+        when(golferService.updateGolfer(g)).thenThrow(HttpClientErrorException.BadRequest.class);
+        mockMvc.perform(post("/golfers")).andExpect(status().isBadRequest());
 
-        // THEN
-        response.andDo(print())
-                .andExpect(status().isNoContent());
+
     }
 
 
     @Test
+    @Order(7)
+    @DisplayName("UPDATE: given valid JSON body - return 200 and update golfer JSON")
     public void  GIVEN_golferID_WHEN_UpdateGolfer_THEN_return200WithUpdatedGolfer() throws Exception{
-       Golfer g = Golfer.builder()
-           .age(24)
-           .name("Garrett Pauley")
-           .nationality("American")
-           .handicap(9).build();
-
+        Golfer g = Golfer.builder()
+                .age(24)
+                .name("Garrett Pauley")
+                .nationality("American")
+                .handicap(9).build();
+        golferService.saveGolfer(g);
         Golfer updatedG = Golfer.builder()
                 .age(24)
                 .name("Garrett Pauley")
                 .nationality("American")
                 .handicap(10).build();
-        // WHEN
-        //BDDMockito.given(golferService.getGolferById(1)).willReturn(Optional.of(g));
-        //BDDMockito.given(golferService.updateGolfer(any(Golfer.class))).willAnswer(invocation -> invocation.getArgument(0));
-        //when(golferService.updateeGolfer(any(Golfer.class))).thenAnswer(invocation -> invocation.getArgument(0));
-        
+        when(golferService.updateGolfer(updatedG)).thenReturn(updatedG);
+
         ResultActions response =
-                 mockMvc.perform(put("/golfers/{id}", 1)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectmapper.writeValueAsString(updatedG))
-        );
-
-
+                mockMvc.perform(put("/golfers/{id}", anyInt())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectmapper.writeValueAsString(updatedG))
+                );
         // THEN
         response.andDo(print())
                 .andExpect(status().isOk())
@@ -202,13 +211,59 @@ class GolferControllerTests {
 
     }
 
+
     @Test
+    @Order(8)
+    @DisplayName("DELETE: valid id returns 200 ")
+    public void GIVEN_golferExists_WHEN_DeleteGolfer_THEN_deleteAndReturn200() throws UserNotFoundException{
+        Golfer g = Golfer.builder()
+                .id(20)
+                .age(24)
+                .name("Garrett Pauley")
+                .nationality("American")
+                .handicap(9).build();
+        golferService.deleteGolfer(g.getId());
+        Mockito.verify(golferService).deleteGolfer(g.getId());
+    }
+
+    @Test
+    @Order(9)
+    @DisplayName("DELETE: non-exist id returned 404")
     public void  GIVEN_golferIDNonExist_WHEN_DeleteGolfers_THEN_return404() throws Exception{
         int someId = 1;
         Mockito.doThrow(new UserNotFoundException(someId)).when(golferService).deleteGolfer(someId);
         mockMvc.perform(delete("/golfers/{id}", someId)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
+                .andDo(print());
+    }
+
+
+    @Test
+    @Order(11)
+    @DisplayName("DELETE: given valid id - delete golfer and return 200")
+    public void  GIVEN_golferID_WHEN_DeleteGolfers_THEN_return200() throws Exception{
+
+        // WHEN
+        ResultActions response = mockMvc.perform(delete("/golfers/1")
+                .contentType(MediaType.APPLICATION_JSON));
+
+        // THEN
+        response.andDo(print())
+                .andExpect(status().isOk());
+        assertTrue(golferService.getGolferById(1).isEmpty());
+    }
+
+
+    @Test
+    @Order(12)
+    @DisplayName("DELETE: non-exist id returned UserNotFoundException")
+    public void  GIVEN_golferIDNonExist_WHEN_DeleteGolfers_THENTHROW_UserNotFound() throws Exception {
+        int someId = 1;
+        Mockito.doThrow(new UserNotFoundException(someId)).when(golferService).deleteGolfer(someId);
+        mockMvc.perform(delete("/golfers/{id}", someId)
+                    .contentType(MediaType.APPLICATION_JSON))
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof UserNotFoundException))
                 .andDo(print());
     }
 

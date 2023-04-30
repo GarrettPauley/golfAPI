@@ -21,7 +21,7 @@ public class Golfer {
     int id;
 
     @Column
-    @NotNull
+    @NotBlank
     String name;
 
     @Column
