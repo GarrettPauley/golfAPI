@@ -15,4 +15,9 @@ public class CustomGlobalExceptionhandler extends ResponseEntityExceptionHandler
     public void handleUserNotFound(HttpServletResponse response) throws IOException {
         response.sendError(HttpStatus.NOT_FOUND.value());
     }
+
+    @ExceptionHandler(CourseNotFoundException.class)
+    public void handleCourseNotFound(HttpServletResponse response) throws IOException {
+        response.sendError(HttpStatus.NOT_FOUND.value());
+    }
 }
