@@ -3,6 +3,8 @@ package com.example.demo.service;
 import com.example.demo.domain.Course;
 import com.example.demo.exceptions.CourseNotFoundException;
 import com.example.demo.repositories.CourseRepository;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -22,6 +24,10 @@ public class CourseService {
 
    public Optional<Course> getCourseById(long id){
        return Optional.of(repository.findById(id)).orElseThrow(() -> new CourseNotFoundException(id));
+   }
+
+   public Course createCourse(Course course){
+       return repository.save(course);
    }
 
 }

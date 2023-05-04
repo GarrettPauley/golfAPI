@@ -1,16 +1,16 @@
 package com.example.demo.domain;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Entity
 @Table(name = "COURSES")
 public class Course {
@@ -25,18 +25,21 @@ public class Course {
 
     @NotNull
     @Column
-    @Size(min = -90, max =90, message="Latitude must be between -90 and 90 inclusive. ")
+    @DecimalMin(value="-90.0", message= "latitude must be greater than -90.0 and less than 90.0")
+    @DecimalMax(value="90.0", message= "latitude must be greater than -90.0 and less than 90.0")
     private float latitude;
 
     @NotNull
     @Column
-   @Size(min = -180, max = 180, message="Longitude must be between -180 and 180 inclusive. ")
+    @DecimalMin(value="-180.0", message= "latitude must be greater than -180.0 and less than 180.0")
+    @DecimalMax(value="180.0", message= "latitude must be greater than -180.0 and less than 180.0")
     private float longitude;
 
 
     @Column
-    @NotBlank
-    @Size(min=68, max=74, message = "Course par rating should be between 68 and 74")
+    @NotNull
+    @Min(value=68)
+    @Max(value=72)
     private int par;
 
     @Column
@@ -44,7 +47,8 @@ public class Course {
     private int yardage;
 
     @Column
-    @Size(min=1, max=5, message="Rating must be between 1 and 5 inclusive." )
+    @DecimalMin(value="0.0", message= "rating must be between 0 and 5")
+    @DecimalMax(value="5.0", message= "rating must be between 0 and 5")
     private float rating;
 
 }
