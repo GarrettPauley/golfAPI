@@ -1,32 +1,20 @@
-package com.example.demo;
+package com.example.golf;
 
 
 
-import com.example.demo.controllers.CourseController;
-import com.example.demo.controllers.GolferController;
-import com.example.demo.domain.Course;
-import com.example.demo.domain.Golfer;
-import com.example.demo.exceptions.CourseNotFoundException;
-import com.example.demo.exceptions.UserNotFoundException;
-import com.example.demo.service.CourseService;
-import com.example.demo.service.GolferService;
+import com.example.golf.controllers.CourseController;
+import com.example.golf.domain.Course;
+import com.example.golf.exceptions.CourseNotFoundException;
+import com.example.golf.service.CourseService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.validation.constraints.DecimalMin;
-import org.aspectj.weaver.patterns.ReferencePointcut;
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.data.web.JsonPath;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
-import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
-import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.Arrays;
 import java.util.List;
@@ -34,7 +22,6 @@ import java.util.Optional;
 
 import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -112,13 +99,20 @@ public class CourseControllerTests {
     }
 
     @Test
-    @DisplayName("POST /courses with invalid body should return a 400 bad request response")
-    public void GIVEN_invalidBody_WHEN_postrequest_THEN_createCourse() throws Exception{
-        // latitude must be between -90 and 90.
-        Course course = new Course(10, "Some fictitious course", 180f, 60.3f, 70, 6800, 3.4f);
+    @DisplayName("DELETE: Delete course and return 200 ")
+    public void GIVEN_validId_WHEN_Deleterequest_THEN_deleteCourse_return200() throws Exception{
 
-        mockMvc.perform(post("/courses"))
-                .andExpect(status().isBadRequest());
+        Course fake1 = new Course(123, "The hills at IDC", 32, 60, 4, 6800, 5.0f);
+        mockMvc.perform(delete("/courses/123")).andExpect(status().isOk());
+    }
+
+    @Test
+    @DisplayName("DELETE: When id does not exist return 404")
+    public void GIVEN_invalidId_WHEN_Deleterequest_THEN_deleteCourse_return404() throws Exception{
+       Mockito.doThrow(CourseNotFoundException.class).when(courseService).deleteCourse(123);
+        mockMvc.perform(delete("/courses/123"))
+                    .andExpect(status().isNotFound())
+                    .andExpect(result -> assertTrue(result.getResolvedException() instanceof CourseNotFoundException));
     }
 
 

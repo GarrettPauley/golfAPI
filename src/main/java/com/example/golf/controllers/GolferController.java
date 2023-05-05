@@ -1,19 +1,14 @@
-package com.example.demo.controllers;
+package com.example.golf.controllers;
 
-import com.example.demo.domain.Golfer;
-import com.example.demo.exceptions.UserNotFoundException;
-import com.example.demo.service.GolferService;
+import com.example.golf.domain.Golfer;
+import com.example.golf.exceptions.GolferNotFoundException;
+import com.example.golf.service.GolferService;
 import jakarta.validation.Valid;
-import org.apache.tomcat.util.http.parser.HttpParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
-import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -30,7 +25,7 @@ public class GolferController {
     }
 
     @GetMapping("/golfers/{id}")
-    private Optional<Golfer> getGolfer(@PathVariable int id) throws UserNotFoundException {
+    private Optional<Golfer> getGolfer(@PathVariable int id) throws GolferNotFoundException{
         return service.getGolferById(id);
     }
 
@@ -49,7 +44,7 @@ public class GolferController {
 
 
     @DeleteMapping("/golfers/{id}")
-    private void deleteGolfer(@PathVariable int id) throws UserNotFoundException{
+    private void deleteGolfer(@PathVariable int id) throws GolferNotFoundException {
         service.deleteGolfer(id);
     }
 

@@ -1,10 +1,8 @@
-package com.example.demo.service;
+package com.example.golf.service;
 
-import com.example.demo.domain.Course;
-import com.example.demo.exceptions.CourseNotFoundException;
-import com.example.demo.repositories.CourseRepository;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import com.example.golf.domain.Course;
+import com.example.golf.exceptions.CourseNotFoundException;
+import com.example.golf.repositories.CourseRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -28,6 +26,11 @@ public class CourseService {
 
    public Course createCourse(Course course){
        return repository.save(course);
+   }
+
+   public void deleteCourse(long id){
+       repository.findById(id).orElseThrow(() -> new CourseNotFoundException(id));
+       repository.deleteById(id);
    }
 
 }

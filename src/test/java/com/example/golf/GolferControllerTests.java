@@ -1,9 +1,9 @@
-package com.example.demo;
+package com.example.golf;
 
-import com.example.demo.controllers.GolferController;
-import com.example.demo.domain.Golfer;
-import com.example.demo.exceptions.UserNotFoundException;
-import com.example.demo.service.GolferService;
+import com.example.golf.controllers.GolferController;
+import com.example.golf.domain.Golfer;
+import com.example.golf.exceptions.GolferNotFoundException;
+import com.example.golf.service.GolferService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.*;
@@ -79,7 +79,7 @@ class GolferControllerTests {
         int fakeId = 12345;
         String nonExistURI = GOLFER_CONTROLLER_BASE  + fakeId;
         // WHEN & THEN
-        when(golferService.getGolferById(fakeId)).thenThrow(UserNotFoundException.class);
+        when(golferService.getGolferById(fakeId)).thenThrow(GolferNotFoundException.class);
         mockMvc.perform(MockMvcRequestBuilders.get(nonExistURI))
                 .andExpect(status().isNotFound()).andDo(print());
     }
@@ -202,7 +202,7 @@ class GolferControllerTests {
     @Test
     @Order(8)
     @DisplayName("DELETE: valid id returns 200 ")
-    public void GIVEN_golferExists_WHEN_DeleteGolfer_THEN_deleteAndReturn200() throws UserNotFoundException{
+    public void GIVEN_golferExists_WHEN_DeleteGolfer_THEN_deleteAndReturn200() throws GolferNotFoundException {
         Golfer g = Golfer.builder()
                 .id(20)
                 .age(24)
@@ -218,7 +218,7 @@ class GolferControllerTests {
     @DisplayName("DELETE: non-exist id returned 404")
     public void  GIVEN_golferIDNonExist_WHEN_DeleteGolfers_THEN_return404() throws Exception{
         int someId = 1;
-        Mockito.doThrow(new UserNotFoundException(someId)).when(golferService).deleteGolfer(someId);
+        Mockito.doThrow(new GolferNotFoundException(someId)).when(golferService).deleteGolfer(someId);
         mockMvc.perform(delete("/golfers/{id}", someId)
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound())
@@ -247,10 +247,10 @@ class GolferControllerTests {
     @DisplayName("DELETE: non-exist id returned UserNotFoundException")
     public void  GIVEN_golferIDNonExist_WHEN_DeleteGolfers_THENTHROW_UserNotFound() throws Exception {
         int someId = 1;
-        Mockito.doThrow(new UserNotFoundException(someId)).when(golferService).deleteGolfer(someId);
+        Mockito.doThrow(new GolferNotFoundException(someId)).when(golferService).deleteGolfer(someId);
         mockMvc.perform(delete("/golfers/{id}", someId)
                     .contentType(MediaType.APPLICATION_JSON))
-            .andExpect(result -> assertTrue(result.getResolvedException() instanceof UserNotFoundException))
+            .andExpect(result -> assertTrue(result.getResolvedException() instanceof GolferNotFoundException))
                 .andDo(print());
     }
 

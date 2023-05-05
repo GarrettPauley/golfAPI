@@ -1,6 +1,6 @@
-package com.example.demo.repositories;
+package com.example.golf.repositories;
 
-import com.example.demo.domain.Golfer;
+import com.example.golf.domain.Golfer;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 

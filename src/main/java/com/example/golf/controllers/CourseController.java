@@ -1,14 +1,11 @@
-package com.example.demo.controllers;
+package com.example.golf.controllers;
 
-import com.example.demo.domain.Course;
-import com.example.demo.exceptions.CourseNotFoundException;
-import com.example.demo.exceptions.UserNotFoundException;
-import com.example.demo.service.CourseService;
+import com.example.golf.domain.Course;
+import com.example.golf.exceptions.CourseNotFoundException;
+import com.example.golf.service.CourseService;
 import jakarta.validation.Valid;
-import org.h2.engine.User;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -37,6 +34,12 @@ public class CourseController {
     public ResponseEntity<Course> addCourse(@RequestBody @Valid Course course){
         courseService.createCourse(course);
         return new ResponseEntity<>(course, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/courses/{id}")
+    public void deleteCourse(@PathVariable long  id){
+        courseService.deleteCourse(id);
+
     }
 
     // update a course
